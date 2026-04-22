@@ -18,13 +18,9 @@ const Home = () => {
 
   // 📦 Fetch products
   const fetchProducts = async () => {
-    try {
-      const res = await fetch(`${API_URL}/products`);
-      const data = await res.json();
-      setProducts(data);
-    } catch (err) {
-      console.log(err);
-    }
+    const res = await fetch(`${API_URL}/products`);
+    const data = await res.json();
+    setProducts(data);
   };
 
   // 🛒 Fetch cart
@@ -47,38 +43,34 @@ const Home = () => {
 
       setCartItems(map);
     } catch (err) {
-      console.log("Cart fetch error:", err);
+      console.log(err);
     }
   };
 
   // ➕➖ Update cart
   const updateCart = async (productId, quantityChange) => {
     if (!token) {
-      alert("Please login first");
+      alert("Login first");
       navigate("/login");
       return;
     }
 
-    try {
-      await fetch(`${API_URL}/cart/add`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
-        },
-        body: JSON.stringify({
-          productId,
-          quantity: quantityChange,
-        }),
-      });
+    await fetch(`${API_URL}/cart/add`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`,
+      },
+      body: JSON.stringify({
+        productId,
+        quantity: quantityChange,
+      }),
+    });
 
-      fetchCart(); // refresh UI
-    } catch (err) {
-      console.log(err);
-    }
+    fetchCart();
   };
 
-  // 🔍 Search filter
+  // 🔍 Search
   const filteredProducts = products.filter((p) =>
     p.name.toLowerCase().includes(search.toLowerCase())
   );
@@ -87,7 +79,7 @@ const Home = () => {
     <div style={{ padding: "30px" }}>
       <h1>Fresh Groceries 🥬</h1>
 
-      {/* 🔘 NAV BUTTON */}
+      {/* NAV BUTTON */}
       <button
         onClick={() => navigate("/orders")}
         style={{
@@ -102,7 +94,7 @@ const Home = () => {
         Go to Orders 📦
       </button>
 
-      {/* 🔍 SEARCH */}
+      {/* SEARCH */}
       <input
         placeholder="Search products..."
         value={search}
@@ -112,7 +104,6 @@ const Home = () => {
           width: "100%",
           marginBottom: "20px",
           borderRadius: "8px",
-          border: "1px solid #ccc",
         }}
       />
 
@@ -139,18 +130,34 @@ const Home = () => {
               <h3>{p.name}</h3>
               <p>₹{p.price}</p>
 
-              {/* 🔥 FIXED LOGIC */}
-              {quantity === 0 ? (
-                <button onClick={() => updateCart(p._id, 1)}>
-                  Add to Cart
-                </button>
-              ) : (
-                <div style={{ display: "flex", gap: "10px" }}>
-                  <button onClick={() => updateCart(p._id, -1)}>-</button>
-                  <span>{quantity}</span>
-                  <button onClick={() => updateCart(p._id, 1)}>+</button>
-                </div>
-              )}
+              {/* 🟢 ADD TO CART BUTTON */}
+              <button
+                onClick={() => updateCart(p._id, 1)}
+                style={{
+                  marginTop: "10px",
+                  width: "100%",
+                  background: "#00b386",
+                  color: "white",
+                  padding: "8px",
+                  border: "none",
+                  borderRadius: "6px",
+                }}
+              >
+                Add to Cart
+              </button>
+
+              {/* ➕➖ CONTROLS */}
+              <div
+                style={{
+                  display: "flex",
+                  justifyContent: "space-between",
+                  marginTop: "10px",
+                }}
+              >
+                <button onClick={() => updateCart(p._id, -1)}>-</button>
+                <span>{quantity}</span>
+                <button onClick={() => updateCart(p._id, 1)}>+</button>
+              </div>
             </div>
           );
         })}
