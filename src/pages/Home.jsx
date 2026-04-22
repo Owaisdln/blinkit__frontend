@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
 
 const API_URL = import.meta.env.VITE_API_URL;
 
@@ -7,6 +8,7 @@ const Home = () => {
   const [search, setSearch] = useState("");
   const [cartItems, setCartItems] = useState({});
 
+  const navigate = useNavigate();
   const token = localStorage.getItem("token");
 
   useEffect(() => {
@@ -16,13 +18,19 @@ const Home = () => {
 
   // 📦 Fetch products
   const fetchProducts = async () => {
-    const res = await fetch(`${API_URL}/products`);
-    const data = await res.json();
-    setProducts(data);
+    try {
+      const res = await fetch(`${API_URL}/products`);
+      const data = await res.json();
+      setProducts(data);
+    } catch (err) {
+      console.log(err);
+    }
   };
 
   // 🛒 Fetch cart
   const fetchCart = async () => {
+    if (!token) return;
+
     try {
       const res = await fetch(`${API_URL}/cart`, {
         headers: {
@@ -39,12 +47,18 @@ const Home = () => {
 
       setCartItems(map);
     } catch (err) {
-      console.log(err);
+      console.log("Cart fetch error:", err);
     }
   };
 
   // ➕➖ Update cart
   const updateCart = async (productId, quantityChange) => {
+    if (!token) {
+      alert("Please login first");
+      navigate("/login");
+      return;
+    }
+
     try {
       await fetch(`${API_URL}/cart/add`, {
         method: "POST",
@@ -73,6 +87,21 @@ const Home = () => {
     <div style={{ padding: "30px" }}>
       <h1>Fresh Groceries 🥬</h1>
 
+      {/* 🔘 NAV BUTTON */}
+      <button
+        onClick={() => navigate("/orders")}
+        style={{
+          marginBottom: "15px",
+          padding: "10px",
+          background: "#00b386",
+          color: "white",
+          border: "none",
+          borderRadius: "8px",
+        }}
+      >
+        Go to Orders 📦
+      </button>
+
       {/* 🔍 SEARCH */}
       <input
         placeholder="Search products..."
@@ -81,18 +110,18 @@ const Home = () => {
         style={{
           padding: "10px",
           width: "100%",
-          margin: "20px 0",
+          marginBottom: "20px",
           borderRadius: "8px",
           border: "1px solid #ccc",
         }}
       />
 
-      {/* 🛍 PRODUCTS */}
+      {/* PRODUCTS */}
       <div
         style={{
           display: "grid",
           gridTemplateColumns: "repeat(auto-fill, minmax(220px, 1fr))",
-          gap: "25px",
+          gap: "20px",
         }}
       >
         {filteredProducts.map((p) => {
@@ -103,39 +132,20 @@ const Home = () => {
               key={p._id}
               style={{
                 background: "#fff",
-                padding: "18px",
-                borderRadius: "12px",
-                boxShadow: "0 4px 15px rgba(0,0,0,0.08)",
+                padding: "15px",
+                borderRadius: "10px",
               }}
             >
               <h3>{p.name}</h3>
-              <p style={{ fontWeight: "bold" }}>₹{p.price}</p>
+              <p>₹{p.price}</p>
 
-              {/* 🧠 CONDITIONAL BUTTON */}
+              {/* 🔥 FIXED LOGIC */}
               {quantity === 0 ? (
-                <button
-                  onClick={() => updateCart(p._id, 1)}
-                  style={{
-                    marginTop: "10px",
-                    width: "100%",
-                    background: "#00b386",
-                    color: "white",
-                    padding: "10px",
-                    border: "none",
-                    borderRadius: "8px",
-                  }}
-                >
+                <button onClick={() => updateCart(p._id, 1)}>
                   Add to Cart
                 </button>
               ) : (
-                <div
-                  style={{
-                    display: "flex",
-                    justifyContent: "space-between",
-                    alignItems: "center",
-                    marginTop: "10px",
-                  }}
-                >
+                <div style={{ display: "flex", gap: "10px" }}>
                   <button onClick={() => updateCart(p._id, -1)}>-</button>
                   <span>{quantity}</span>
                   <button onClick={() => updateCart(p._id, 1)}>+</button>

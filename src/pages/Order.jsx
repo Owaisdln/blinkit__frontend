@@ -3,8 +3,7 @@ import { useEffect, useState } from "react";
 const API_URL = import.meta.env.VITE_API_URL;
 
 const Orders = () => {
-  const [orders, setOrders] = useState(null);
-
+  const [orders, setOrders] = useState([]);
   const token = localStorage.getItem("token");
 
   const fetchOrders = async () => {
@@ -16,17 +15,15 @@ const Orders = () => {
       });
 
       const data = await res.json();
-      setOrders(data);
+      setOrders(data || []);
     } catch (err) {
       console.log(err);
     }
   };
 
   useEffect(() => {
-    fetchOrders();
+    if (token) fetchOrders();
   }, []);
-
-  if (!orders) return <p style={{ padding: "20px" }}>Loading...</p>;
 
   return (
     <div style={{ padding: "30px" }}>
@@ -39,25 +36,19 @@ const Orders = () => {
           <div
             key={order._id}
             style={{
-              background: "#fff",
-              padding: "15px",
-              marginTop: "20px",
-              borderRadius: "10px",
-              boxShadow: "0 2px 10px rgba(0,0,0,0.1)",
+              border: "1px solid #ccc",
+              padding: "10px",
+              marginTop: "15px",
             }}
           >
-            <p><strong>Order ID:</strong> {order._id}</p>
-            <p><strong>Status:</strong> {order.status}</p>
-            <p><strong>Address:</strong> {order.address}</p>
-            <p><strong>Phone:</strong> {order.phone}</p>
+            <p>Status: {order.status}</p>
+            <p>Address: {order.address}</p>
+            <p>Phone: {order.phone}</p>
 
-            <h3>Items:</h3>
             {order.items.map((item) => (
-              <div key={item._id}>
-                <p>
-                  {item.product?.name} × {item.quantity}
-                </p>
-              </div>
+              <p key={item._id}>
+                {item.product?.name} × {item.quantity}
+              </p>
             ))}
 
             <h3>Total: ₹{order.totalAmount}</h3>
