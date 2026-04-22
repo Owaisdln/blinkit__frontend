@@ -5,9 +5,17 @@ const API_URL = import.meta.env.VITE_API_URL;
 const Login = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [loading, setLoading] = useState(false);
 
   const handleLogin = async () => {
+    if (!email || !password) {
+      alert("Enter email and password");
+      return;
+    }
+
     try {
+      setLoading(true);
+
       const res = await fetch(`${API_URL}/auth/login`, {
         method: "POST",
         headers: {
@@ -18,12 +26,24 @@ const Login = () => {
 
       const data = await res.json();
 
+      console.log("LOGIN RESPONSE:", data); // 🔍 debug
+
+      if (!res.ok || !data.token) {
+        alert(data.message || "Login failed");
+        return;
+      }
+
       localStorage.setItem("token", data.token);
 
-      alert("Login successful");
-      window.location.href = "/"; // redirect
+      alert("Login successful ✅");
+
+      // redirect
+      window.location.href = "/";
     } catch (err) {
       console.log(err);
+      alert("Something went wrong");
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -33,6 +53,7 @@ const Login = () => {
 
       <input
         placeholder="Email"
+        value={email}
         onChange={(e) => setEmail(e.target.value)}
         style={{ display: "block", margin: "10px 0", padding: "8px" }}
       />
@@ -40,11 +61,14 @@ const Login = () => {
       <input
         placeholder="Password"
         type="password"
+        value={password}
         onChange={(e) => setPassword(e.target.value)}
         style={{ display: "block", margin: "10px 0", padding: "8px" }}
       />
 
-      <button onClick={handleLogin}>Login</button>
+      <button onClick={handleLogin} disabled={loading}>
+        {loading ? "Logging in..." : "Login"}
+      </button>
     </div>
   );
 };
