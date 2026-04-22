@@ -2,6 +2,7 @@ import { Routes, Route, Link } from "react-router-dom";
 import Home from "./pages/Home";
 import Cart from "./pages/Cart";
 import Login from "./pages/Login";
+import Orders from "./pages/Orders";
 
 function App() {
   return (
@@ -18,11 +19,14 @@ function App() {
         <h2>QuickCart</h2>
 
         <div>
-          <Link to="/" style={{ color: "white", marginRight: "15px" }}>
+          <Link to="/" style={{ marginRight: "15px", color: "white" }}>
             Home
           </Link>
-          <Link to="/cart" style={{ color: "white", marginRight: "15px" }}>
+          <Link to="/cart" style={{ marginRight: "15px", color: "white" }}>
             Cart
+          </Link>
+          <Link to="/orders" style={{ marginRight: "15px", color: "white" }}>
+            Orders
           </Link>
           <Link to="/login" style={{ color: "white" }}>
             Login
@@ -33,6 +37,7 @@ function App() {
       <Routes>
         <Route path="/" element={<Home />} />
         <Route path="/cart" element={<Cart />} />
+        <Route path="/orders" element={<Orders />} />
         <Route path="/login" element={<Login />} />
       </Routes>
     </div>
