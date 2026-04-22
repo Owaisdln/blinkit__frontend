@@ -5,23 +5,46 @@ const API_URL = import.meta.env.VITE_API_URL;
 const Home = () => {
   const [products, setProducts] = useState([]);
   const [search, setSearch] = useState("");
+  const [cartItems, setCartItems] = useState({});
+
+  const token = localStorage.getItem("token");
 
   useEffect(() => {
-    fetch(`${API_URL}/products`)
-      .then((res) => res.json())
-      .then((data) => setProducts(data))
-      .catch((err) => console.log(err));
+    fetchProducts();
+    fetchCart();
   }, []);
 
-  // 🔍 Search filter
-  const filteredProducts = products.filter((p) =>
-    p.name.toLowerCase().includes(search.toLowerCase())
-  );
+  // 📦 Fetch products
+  const fetchProducts = async () => {
+    const res = await fetch(`${API_URL}/products`);
+    const data = await res.json();
+    setProducts(data);
+  };
 
-  // ➕ Add / remove quantity
-  const updateCart = async (productId, quantity) => {
-    const token = localStorage.getItem("token");
+  // 🛒 Fetch cart
+  const fetchCart = async () => {
+    try {
+      const res = await fetch(`${API_URL}/cart`, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
 
+      const data = await res.json();
+
+      const map = {};
+      data.items?.forEach((item) => {
+        map[item.product._id] = item.quantity;
+      });
+
+      setCartItems(map);
+    } catch (err) {
+      console.log(err);
+    }
+  };
+
+  // ➕➖ Update cart
+  const updateCart = async (productId, quantityChange) => {
     try {
       await fetch(`${API_URL}/cart/add`, {
         method: "POST",
@@ -31,19 +54,26 @@ const Home = () => {
         },
         body: JSON.stringify({
           productId,
-          quantity,
+          quantity: quantityChange,
         }),
       });
+
+      fetchCart(); // refresh UI
     } catch (err) {
       console.log(err);
     }
   };
 
+  // 🔍 Search filter
+  const filteredProducts = products.filter((p) =>
+    p.name.toLowerCase().includes(search.toLowerCase())
+  );
+
   return (
     <div style={{ padding: "30px" }}>
       <h1>Fresh Groceries 🥬</h1>
 
-      {/* 🔍 SEARCH BAR */}
+      {/* 🔍 SEARCH */}
       <input
         placeholder="Search products..."
         value={search}
@@ -57,7 +87,7 @@ const Home = () => {
         }}
       />
 
-      {/* 🛍 PRODUCT GRID */}
+      {/* 🛍 PRODUCTS */}
       <div
         style={{
           display: "grid",
@@ -65,42 +95,55 @@ const Home = () => {
           gap: "25px",
         }}
       >
-        {filteredProducts.map((p) => (
-          <div
-            key={p._id}
-            style={{
-              background: "#fff",
-              padding: "18px",
-              borderRadius: "12px",
-              boxShadow: "0 4px 15px rgba(0,0,0,0.08)",
-            }}
-          >
-            <h3>{p.name}</h3>
-            <p style={{ fontWeight: "bold" }}>₹{p.price}</p>
+        {filteredProducts.map((p) => {
+          const quantity = cartItems[p._id] || 0;
 
-            {/* ➕➖ QUANTITY BUTTONS */}
-            <div style={{ display: "flex", gap: "10px", marginTop: "10px" }}>
-              <button
-                onClick={() => updateCart(p._id, -1)}
-                style={{ padding: "5px 10px" }}
-              >
-                -
-              </button>
+          return (
+            <div
+              key={p._id}
+              style={{
+                background: "#fff",
+                padding: "18px",
+                borderRadius: "12px",
+                boxShadow: "0 4px 15px rgba(0,0,0,0.08)",
+              }}
+            >
+              <h3>{p.name}</h3>
+              <p style={{ fontWeight: "bold" }}>₹{p.price}</p>
 
-              <button
-                onClick={() => updateCart(p._id, 1)}
-                style={{
-                  padding: "5px 10px",
-                  background: "#00b386",
-                  color: "white",
-                  border: "none",
-                }}
-              >
-                +
-              </button>
+              {/* 🧠 CONDITIONAL BUTTON */}
+              {quantity === 0 ? (
+                <button
+                  onClick={() => updateCart(p._id, 1)}
+                  style={{
+                    marginTop: "10px",
+                    width: "100%",
+                    background: "#00b386",
+                    color: "white",
+                    padding: "10px",
+                    border: "none",
+                    borderRadius: "8px",
+                  }}
+                >
+                  Add to Cart
+                </button>
+              ) : (
+                <div
+                  style={{
+                    display: "flex",
+                    justifyContent: "space-between",
+                    alignItems: "center",
+                    marginTop: "10px",
+                  }}
+                >
+                  <button onClick={() => updateCart(p._id, -1)}>-</button>
+                  <span>{quantity}</span>
+                  <button onClick={() => updateCart(p._id, 1)}>+</button>
+                </div>
+              )}
             </div>
-          </div>
-        ))}
+          );
+        })}
       </div>
     </div>
   );
