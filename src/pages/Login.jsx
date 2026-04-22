@@ -1,6 +1,6 @@
 import { useState } from "react";
 
-const API_URL = "https://blinkit-suq6.onrender.com/api";
+const API_URL = import.meta.env.VITE_API_URL;
 
 const Login = () => {
   const [email, setEmail] = useState("");
@@ -18,28 +18,30 @@ const Login = () => {
 
       const data = await res.json();
 
-      // Save token
       localStorage.setItem("token", data.token);
 
       alert("Login successful");
+      window.location.href = "/"; // redirect
     } catch (err) {
       console.log(err);
     }
   };
 
   return (
-    <div>
+    <div style={{ padding: "30px" }}>
       <h1>Login</h1>
 
       <input
         placeholder="Email"
         onChange={(e) => setEmail(e.target.value)}
+        style={{ display: "block", margin: "10px 0", padding: "8px" }}
       />
 
       <input
         placeholder="Password"
         type="password"
         onChange={(e) => setPassword(e.target.value)}
+        style={{ display: "block", margin: "10px 0", padding: "8px" }}
       />
 
       <button onClick={handleLogin}>Login</button>

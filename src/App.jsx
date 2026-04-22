@@ -1,6 +1,7 @@
 import { Routes, Route, Link } from "react-router-dom";
 import Home from "./pages/Home";
 import Cart from "./pages/Cart";
+import Login from "./pages/Login";
 
 function App() {
   return (
@@ -20,8 +21,11 @@ function App() {
           <Link to="/" style={{ color: "white", marginRight: "15px" }}>
             Home
           </Link>
-          <Link to="/cart" style={{ color: "white" }}>
+          <Link to="/cart" style={{ color: "white", marginRight: "15px" }}>
             Cart
+          </Link>
+          <Link to="/login" style={{ color: "white" }}>
+            Login
           </Link>
         </div>
       </nav>
@@ -29,6 +33,7 @@ function App() {
       <Routes>
         <Route path="/" element={<Home />} />
         <Route path="/cart" element={<Cart />} />
+        <Route path="/login" element={<Login />} />
       </Routes>
     </div>
   );
