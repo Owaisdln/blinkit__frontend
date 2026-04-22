@@ -10,28 +10,16 @@ function App() {
       <nav
         style={{
           display: "flex",
-          justifyContent: "space-between",
-          padding: "15px 20px",
-          backgroundColor: "#00b386",
+          gap: "15px",
+          padding: "15px",
+          background: "#00b386",
           color: "white",
         }}
       >
-        <h2>QuickCart</h2>
-
-        <div>
-          <Link to="/" style={{ marginRight: "15px", color: "white" }}>
-            Home
-          </Link>
-          <Link to="/cart" style={{ marginRight: "15px", color: "white" }}>
-            Cart
-          </Link>
-          <Link to="/orders" style={{ marginRight: "15px", color: "white" }}>
-            Orders
-          </Link>
-          <Link to="/login" style={{ color: "white" }}>
-            Login
-          </Link>
-        </div>
+        <Link to="/" style={{ color: "white" }}>Home</Link>
+        <Link to="/cart" style={{ color: "white" }}>Cart</Link>
+        <Link to="/orders" style={{ color: "white" }}>Orders</Link>
+        <Link to="/login" style={{ color: "white" }}>Login</Link>
       </nav>
 
       <Routes>
